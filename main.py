@@ -1,4 +1,5 @@
 import argparse
+from email import message
 import os
 
 from dotenv import load_dotenv
@@ -16,20 +17,26 @@ def main() -> None:
         "user_prompt",
         help="'user_prompt': Type your prompt to the chatbot right after 'main.py'.",
     )
-    arg = parser.parse_args()
+    args = parser.parse_args()
 
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
+
+    generate_content(args=args, client=client)
+
+
+def generate_content(args: Namespace, client: OpenAI):
+
+    # Next lines where declare role, content, message and response could be
+    # placed outside the func and message be passed as input instead of args.
+    role = "user"
+    content = args.user_prompt
+
+    messages: list[dict[str, str]] = [{"role": role, "content": content}]
     response = client.chat.completions.create(
-        model="openrouter/free",
-        messages=[
-            {
-                "role": "user",
-                "content": arg.user_prompt,
-            }
-        ],
+        model="openrouter/free", messages=messages
     )
 
     if not response.usage:
