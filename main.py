@@ -1,3 +1,4 @@
+import argparse
 import os
 
 from dotenv import load_dotenv
@@ -10,6 +11,13 @@ def main() -> None:
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY environment variable wasn't found.")
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "user_prompt",
+        help="'user_prompt': Type your prompt to the chatbot right after 'main.py'.",
+    )
+    arg = parser.parse_args()
+
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
@@ -19,7 +27,7 @@ def main() -> None:
         messages=[
             {
                 "role": "user",
-                "content": "Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.",
+                "content": arg.user_prompt,
             }
         ],
     )
