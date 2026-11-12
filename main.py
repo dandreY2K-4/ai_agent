@@ -1,6 +1,8 @@
 import argparse
+import json
 import os
 
+from call_function import available_functions
 from dotenv import load_dotenv
 from openai import OpenAI
 from prompts import system_prompt
@@ -43,6 +45,7 @@ def generate_content(client: OpenAI, messages: list, verbose: bool) -> None:
     response = client.chat.completions.create(
         model="openrouter/free",
         messages=messages,
+        tools=available_functions,  # type: ignore
     )
 
     if not response.usage:
@@ -50,11 +53,17 @@ def generate_content(client: OpenAI, messages: list, verbose: bool) -> None:
             "idk man, for some reason tokens were None... check your key or something and good luck."
         )
 
-    x = response.usage.prompt_tokens
-    y = response.usage.completion_tokens
-
     if verbose:
-        print(f"Prompt tokens: {x}\nResponse tokens: {y}\n")
+        print(
+            f"Prompt tokens: {response.usage.prompt_tokens}\nResponse tokens: {response.usage.completion_tokens}\n"
+        )
+
+    message = response.choices[0].message
+
+    if message.tool_calls:
+        for tool_call in message.tool_calls:
+            function_args = json.loads(tool_call.function.arguments or "{}")  # type: ignore
+            print(f"Calling function: {tool_call.function.name}({function_args})")  # type: ignore
 
     print(f"Response:\n{response.choices[0].message.content}")
 
