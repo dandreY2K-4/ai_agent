@@ -3,6 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from prompts import system_prompt
 
 
 def main() -> None:
@@ -24,14 +25,15 @@ def main() -> None:
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-
-    role = "user"
-    content = args.user_prompt
+    user_content = args.user_prompt
     verbose = args.user_prompt
-    messages = [{"role": role, "content": content}]
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_content},
+    ]
 
     if verbose:
-        print(f"User prompt: {content}\n")
+        print(f"User prompt: {user_content}\n")
 
     generate_content(client=client, messages=messages, verbose=verbose)
 
@@ -39,7 +41,8 @@ def main() -> None:
 def generate_content(client: OpenAI, messages: list, verbose: bool) -> None:
 
     response = client.chat.completions.create(
-        model="openrouter/free", messages=messages  # type: ignore
+        model="openrouter/free",
+        messages=messages,
     )
 
     if not response.usage:
