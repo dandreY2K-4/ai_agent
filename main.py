@@ -1,8 +1,9 @@
 import argparse
+from collections.abc import Callable
 import json
 import os
 
-from call_function import available_functions
+from call_function import available_functions, call_function
 from dotenv import load_dotenv
 from openai import OpenAI
 from prompts import system_prompt
@@ -61,8 +62,9 @@ def generate_content(client: OpenAI, messages: list, verbose: bool) -> None:
 
     if message.tool_calls:
         for tool_call in message.tool_calls:
-            function_args = json.loads(tool_call.function.arguments or "{}")  # type: ignore
-            print(f"Calling function: {tool_call.function.name}({function_args})")  # type: ignore
+            result_message = call_function(tool_call=tool_call, verbose=verbose)
+            if verbose:
+                print(f"-> {result_message['content']}")
 
     print(f"Response:\n{response.choices[0].message.content}")
 
