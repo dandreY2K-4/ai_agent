@@ -54,9 +54,8 @@ def generate_content(client: OpenAI, messages: list, verbose: bool) -> None:
         )
 
     if verbose:
-        print(
-            f"Prompt tokens: {response.usage.prompt_tokens}\nResponse tokens: {response.usage.completion_tokens}\n"
-        )
+        print(f"Prompt tokens: {response.usage.prompt_tokens}")
+        print(f"Response tokens: {response.usage.completion_tokens}\n")
 
     message = response.choices[0].message
 
